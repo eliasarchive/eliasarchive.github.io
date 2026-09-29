@@ -650,13 +650,11 @@ function ManorSequence({ scene, enteringRoom, onThunder, onAdvance, onSkip }: { 
           </>
         )}
       </div>
+      {scene === manorScenes.length - 1 && <div className={`room-before-entry-dim ${enteringRoom ? "room-before-entry-lighten" : ""}`} aria-hidden="true" />}
       {enteringRoom && (
         <div className="room-threshold-transition" aria-hidden="true">
-          <span className="room-rack-focus" />
-          <span className="room-light-slats" />
           <span className="room-iris" />
           <span className="room-iris-corners"><i /><i /><i /><i /></span>
-          <span className="room-screen-wake" />
           <span className="room-letterbox room-letterbox-top" />
           <span className="room-letterbox room-letterbox-bottom" />
         </div>
