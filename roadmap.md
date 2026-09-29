@@ -115,3 +115,4 @@
 - [x] Prevent hovering one outer character from changing unrelated relationship lines.
 - [x] Close the gap between Rowan's relationship lines and his circle (desktop and mobile), and stop mobile lines from crossing onto the circles.
 - [x] Sweep for GitHub Pages bugs (real asset binaries, no stale pointers, typecheck) and verify end-to-end.
+- [x] Keep the final room dim before entry, then brighten it through a smoother room transition.
