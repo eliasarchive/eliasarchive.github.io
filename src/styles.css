@@ -109,9 +109,9 @@ button:focus-visible, a:focus-visible { outline: 1px solid var(--ring); outline-
 @keyframes crest-spin { to { transform: rotate(360deg); } }
 @keyframes feature-swift { 0% { opacity: 0; transform: translateX(26px) skewX(-6deg); filter: blur(6px); } 60% { opacity: 1; filter: blur(0); } 100% { opacity: 1; transform: none; }  }
 @keyframes terminal-target-open { 0% { opacity: 0; clip-path: inset(48% 48% 48% 48%); transform: scale(.82); } 100% { opacity: 1; clip-path: inset(0); transform: scale(1); } }
-@keyframes room-camera-push { 0% { transform: scale(1) rotate(0) translate3d(0,0,0); filter: brightness(1) saturate(1); } 22% { transform: scale(.992) rotate(.15deg) translate3d(0,0,0); filter: brightness(1.02) saturate(1.02); } 100% { transform: scale(1.42) rotate(0) translate3d(0,0,0); filter: brightness(.9) saturate(1.1); } }
+@keyframes room-camera-push { 0% { transform: scale(1); } 18% { transform: scale(.985); } 100% { transform: scale(1.42); } }
 @keyframes room-copy-leave { to { opacity: 0; transform: translateY(24px); filter: blur(4px); } }
-@keyframes desk-scene-enter { from { transform: scale(1.18) rotate(-.25deg); filter: blur(6px) brightness(.85); } 55% { filter: blur(.6px) brightness(1.05); } to { transform: scale(1) rotate(0); filter: blur(0) brightness(1); } }
+@keyframes desk-scene-enter { from { transform: scale(1.12); opacity: .4; } to { transform: scale(1); opacity: 1; } }
 @keyframes dust-float { 0% { opacity: 0; transform: translate3d(0,16px,0) scale(.62); } 13% { opacity: calc(.42 * var(--dust-depth)); } 46% { opacity: calc(.72 * var(--dust-depth)); transform: translate3d(var(--dust-drift),-20px,0) scale(1); } 76% { opacity: calc(.48 * var(--dust-depth)); transform: translate3d(calc(var(--dust-drift) * -.3),-42px,0) scale(1.08); } 100% { opacity: 0; transform: translate3d(calc(var(--dust-drift) * .45),-72px,0) scale(.72); } }
 @keyframes room-focus-halo { 0% { opacity: 0; transform: translate(-50%,-50%) scale(.35); } 35% { opacity: .34; } 100% { opacity: 0; transform: translate(-50%,-50%) scale(7); } }
 @keyframes room-focus-ring { 0% { opacity: 0; transform: translate(-50%,-50%) scale(.55); } 24% { opacity: .8; } 100% { opacity: 0; transform: translate(-50%,-50%) scale(4.8); } }
@@ -156,14 +156,14 @@ button:focus-visible, a:focus-visible { outline: 1px solid var(--ring); outline-
 .terminal-zoom { animation: terminal-zoom 1.45s cubic-bezier(.75,0,.2,1) both; }
 .room-transition-out .room-passage-copy { animation: room-copy-leave .55s cubic-bezier(.4,0,.2,1) both; }
 .room-transition-out > button,.room-transition-out > div:last-child { transition: opacity .3s ease; opacity: 0; }
-.room-camera-push { transform-origin: calc(50% - var(--fw) * .02) calc(50% + var(--fh) * .164); animation: room-camera-push 1.8s cubic-bezier(.7,0,.2,1) both; will-change: transform, filter; }
+.room-camera-push { transform-origin: calc(50% - var(--fw) * .02) calc(50% + var(--fh) * .164); animation: room-camera-push 1.8s cubic-bezier(.7,0,.2,1) both; will-change: transform; }
 .desk-scene-enter { transform-origin: 44.7% 62.1%; animation: desk-scene-enter 1.1s cubic-bezier(.16,.82,.2,1) both; }
 .room-dust { pointer-events: none; position: absolute; inset: 0; z-index: 6; overflow: hidden; opacity: .9; }
 .room-dust span { position: absolute; left: var(--dust-x); top: var(--dust-y); width: var(--dust-size); height: var(--dust-size); border-radius: 47% 53% 58% 42%; background: color-mix(in oklab,var(--brass-soft) 76%,transparent); box-shadow: 0 0 7px color-mix(in oklab,var(--brass-soft) 38%,transparent); animation: dust-float var(--dust-duration) ease-in-out var(--dust-delay) infinite; }
 .room-dust span:nth-child(3n) { filter: blur(.45px); }
 .room-dust span:nth-child(4n) { filter: blur(1.1px); }
 .room-dust span:nth-child(5n) { width: calc(var(--dust-size) * 1.65); height: calc(var(--dust-size) * .7); filter: blur(.7px); }
-.room-dust-rush { transition: transform 1.8s cubic-bezier(.16,.76,.16,1), opacity .8s ease; transform: scale(1.9); transform-origin: 44.7% 62.1%; opacity: 1; filter: blur(.6px); }
+.room-dust-rush { transition: transform 1.8s cubic-bezier(.16,.76,.16,1), opacity .8s ease; transform: scale(1.9); transform-origin: 44.7% 62.1%; opacity: 1; }
 .room-threshold-transition { pointer-events: none; position: absolute; inset: 0; z-index: 9; overflow: hidden; }
 .room-focus-halo,.room-focus-ring { position: absolute; left: 44.7%; top: 62.1%; transform: translate(-50%,-50%); }
 .room-focus-halo { width: 5rem; aspect-ratio: 1; border-radius: 999px; background: radial-gradient(circle,color-mix(in oklab,var(--brass-soft) 26%,transparent),transparent 66%); mix-blend-mode: screen; animation: room-focus-halo 1.2s cubic-bezier(.16,.76,.16,1) both; }
@@ -391,23 +391,25 @@ button:focus-visible, a:focus-visible { outline: 1px solid var(--ring); outline-
 
 .archive-rose-field { pointer-events: none; position: fixed; inset: 0; z-index: 0; opacity: .17; filter: saturate(.9) brightness(.85) blur(3px); transform: scale(1.04); animation: fade-in 2s ease-out both; }
 
-/* Enter-the-room: rack focus + iris lock + light slats + letterbox */
-.room-rack-focus { position: absolute; inset: 0; backdrop-filter: blur(7px) brightness(.8); -webkit-backdrop-filter: blur(7px) brightness(.8); mask-image: radial-gradient(ellipse 30% 26% at 48% 66.4%, transparent 35%, #000 100%); -webkit-mask-image: radial-gradient(ellipse 30% 26% at 48% 66.4%, transparent 35%, #000 100%); animation: room-rack 1.8s cubic-bezier(.6,0,.2,1) both; }
-@keyframes room-rack { 0%,15% { opacity: 0; } 100% { opacity: 1; } }
-.room-light-slats { position: absolute; inset: -30%; background: repeating-linear-gradient(112deg, transparent 0 7%, color-mix(in oklab,var(--brass-soft) 11%,transparent) 8.5%, transparent 10% 16%); mix-blend-mode: screen; filter: blur(8px); animation: room-slats 1.8s cubic-bezier(.45,0,.25,1) both; }
-@keyframes room-slats { 0% { opacity: 0; transform: translate3d(-14%,0,0); } 35% { opacity: .9; } 100% { opacity: 0; transform: translate3d(12%,4%,0); } }
-.room-threshold-transition { --fw: max(100vw, calc(100dvh * 1.9124)); --fh: calc(var(--fw) / 1.9124); }
+/* Enter-the-room: lights dim, lightning, iris lock, screen wake (transform/opacity only) */
+.room-threshold-transition { --fw: max(100vw, calc(100dvh * 1.9124)); --fh: calc(var(--fw) / 1.9124); --cx: calc(50% - var(--fw) * .02); --cy: calc(50% + var(--fh) * .164); }
 .cinematic-frame { --fw: max(100vw, calc(100dvh * 1.9124)); --fh: calc(var(--fw) / 1.9124); }
-.room-iris,.room-iris-corners { position: absolute; left: calc(50% - var(--fw) * .02); top: calc(50% + var(--fh) * .164); translate: -50% -50%; }
-.room-iris { width: 130vw; height: 130vh; border: 1px solid color-mix(in oklab,var(--muted-foreground) 80%,transparent); border-radius: 3px; animation: room-iris 1.8s cubic-bezier(.76,0,.18,1) both; }
-@keyframes room-iris { 0% { width: 130vw; height: 130vh; opacity: 0; box-shadow: 0 0 0 200vmax transparent; } 25% { opacity: .85; } 80%,100% { width: calc(var(--fw) * .066 * 1.42); height: calc(var(--fh) * .086 * 1.42); box-shadow: 0 0 0 200vmax color-mix(in oklab,black 55%,transparent), 0 0 18px color-mix(in oklab,var(--muted-foreground) 30%,transparent); } 80% { opacity: 1; } 100% { opacity: 0; } }
-.room-iris-corners { width: calc(var(--fw) * .066 * 1.42); height: calc(var(--fh) * .086 * 1.42); animation: room-corners 1.8s cubic-bezier(.76,0,.18,1) both; }
+.room-rack-focus { position: absolute; inset: 0; background: radial-gradient(ellipse 22% 20% at var(--cx) var(--cy), transparent 30%, color-mix(in oklab,black 78%,transparent) 100%); opacity: 0; animation: room-dim 1.8s cubic-bezier(.6,0,.2,1) both; }
+@keyframes room-dim { 0%,12% { opacity: 0; } 55% { opacity: .75; } 62% { opacity: .1; } 70%,100% { opacity: .95; } }
+.room-light-slats { position: absolute; inset: 0; background: linear-gradient(180deg, color-mix(in oklab,white 70%,transparent), color-mix(in oklab,var(--muted-foreground) 25%,transparent) 60%, transparent); opacity: 0; animation: room-flash 1.8s linear both; }
+@keyframes room-flash { 0%,55% { opacity: 0; } 57% { opacity: .55; } 60% { opacity: .08; } 62% { opacity: .38; } 70%,100% { opacity: 0; } }
+.room-iris,.room-iris-corners,.room-screen-wake { position: absolute; left: var(--cx); top: var(--cy); width: calc(var(--fw) * .066 * 1.42); height: calc(var(--fh) * .086 * 1.42); translate: -50% -50%; will-change: transform, opacity; }
+.room-iris { border: 1px solid color-mix(in oklab,var(--muted-foreground) 85%,transparent); border-radius: 3px; animation: room-iris 1.8s cubic-bezier(.76,0,.18,1) both; }
+@keyframes room-iris { 0% { transform: scale(9) rotate(-4deg); opacity: 0; } 25% { opacity: .8; } 78% { transform: scale(1) rotate(0); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
+.room-iris-corners { animation: room-corners 1.8s cubic-bezier(.76,0,.18,1) both; }
 .room-iris-corners i { position: absolute; width: 12px; height: 12px; border-color: color-mix(in oklab,var(--muted-foreground) 90%,white); border-style: solid; border-width: 0; }
 .room-iris-corners i:nth-child(1) { left: -4px; top: -4px; border-top-width: 2px; border-left-width: 2px; }
 .room-iris-corners i:nth-child(2) { right: -4px; top: -4px; border-top-width: 2px; border-right-width: 2px; }
 .room-iris-corners i:nth-child(3) { left: -4px; bottom: -4px; border-bottom-width: 2px; border-left-width: 2px; }
 .room-iris-corners i:nth-child(4) { right: -4px; bottom: -4px; border-bottom-width: 2px; border-right-width: 2px; }
-@keyframes room-corners { 0%,55% { opacity: 0; transform: scale(1.5); } 80% { opacity: 1; transform: scale(1); } 90% { transform: scale(.96); } 100% { opacity: 0; transform: scale(1); } }
+@keyframes room-corners { 0%,62% { opacity: 0; transform: scale(1.5); } 80% { opacity: 1; transform: scale(1); } 88% { transform: scale(.95); } 100% { opacity: 1; transform: scale(1); } }
+.room-screen-wake { background: radial-gradient(closest-side, color-mix(in oklab,white 85%,transparent), color-mix(in oklab,var(--muted-foreground) 30%,transparent) 70%, transparent); animation: room-wake 1.8s cubic-bezier(.7,0,.3,1) both; }
+@keyframes room-wake { 0%,78% { opacity: 0; transform: scale(.4); } 88% { opacity: .9; transform: scale(1); } 100% { opacity: 1; transform: scale(14); } }
 .room-letterbox,.desk-letterbox-exit span { position: absolute; left: 0; right: 0; height: 11vh; background: var(--ink, #000); background: color-mix(in oklab,black 92%,transparent); }
 .room-letterbox-top,.desk-letterbox-exit span:first-child { top: 0; }
 .room-letterbox-bottom,.desk-letterbox-exit span:last-child { bottom: 0; }

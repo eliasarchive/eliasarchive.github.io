@@ -551,6 +551,7 @@ export function EliasExperience() {
     else {
       setEnteringRoom(true);
       roomEnter();
+      window.setTimeout(thunder, 950);
       window.setTimeout(() => setStage("desk"), 1750);
     }
   };
@@ -655,6 +656,7 @@ function ManorSequence({ scene, enteringRoom, onThunder, onAdvance, onSkip }: { 
           <span className="room-light-slats" />
           <span className="room-iris" />
           <span className="room-iris-corners"><i /><i /><i /><i /></span>
+          <span className="room-screen-wake" />
           <span className="room-letterbox room-letterbox-top" />
           <span className="room-letterbox room-letterbox-bottom" />
         </div>
