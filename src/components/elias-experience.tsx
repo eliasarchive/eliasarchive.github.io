@@ -601,10 +601,11 @@ const dustMotes = Array.from({ length: 72 }, (_, index) => ({
   depth: 0.58 + ((index * 23) % 43) / 50,
 }));
 
-function RoomDust({ entering = false }: { entering?: boolean }) {
+function RoomDust({ entering = false, subtle = false }: { entering?: boolean; subtle?: boolean }) {
+  const motes = subtle ? dustMotes.slice(0, 38) : dustMotes;
   return (
-    <div className={`room-dust ${entering ? "room-dust-rush" : ""}`} aria-hidden="true">
-      {dustMotes.map((mote, index) => (
+    <div className={`room-dust ${subtle ? "manor-dust" : ""} ${entering ? "room-dust-rush" : ""}`} aria-hidden="true">
+      {motes.map((mote, index) => (
         <span
           key={index}
           style={{
@@ -638,6 +639,7 @@ function ManorSequence({ scene, enteringRoom, onThunder, onAdvance, onSkip }: { 
         ) : (
           <>
             <img src={current.image} alt={scene === manorScenes.length - 1 ? "The manor study with a MacBook centered on the desk" : "An empty manor hall"} width={scene === manorScenes.length - 1 ? 2692 : 1200} height={scene === manorScenes.length - 1 ? 1408 : 675} className={`${scene === manorScenes.length - 1 ? "cinematic-bedroom absolute inset-0 z-0" : "cinematic-image"} h-full w-full object-cover`} />
+            {(scene === 1 || scene === 2) && <RoomDust subtle />}
             {scene === manorScenes.length - 1 && (
               <>
                 <WindowRainCanvas maskSrc={manorRoomPaneMask} className="cinematic-bedroom" layer="rain" zIndex={1} />
@@ -653,6 +655,8 @@ function ManorSequence({ scene, enteringRoom, onThunder, onAdvance, onSkip }: { 
       {scene === manorScenes.length - 1 && <div className={`room-before-entry-dim ${enteringRoom ? "room-before-entry-lighten" : ""}`} aria-hidden="true" />}
       {enteringRoom && (
         <div className="room-threshold-transition" aria-hidden="true">
+          <span className="room-light-seam" />
+          <span className="room-perspective-guides"><i /><i /><i /><i /></span>
           <span className="room-iris" />
           <span className="room-iris-corners"><i /><i /><i /><i /></span>
           <span className="room-letterbox room-letterbox-top" />
