@@ -52,6 +52,8 @@ export function WindowRainCanvas({ maskSrc, className = "", layer = "rain", zInd
     let rain: OutsideDrop[] = [];
     let beads: GlassDrop[] = [];
     let maskReady = false;
+    let paused = document.hidden;
+    let haze: CanvasGradient | null = null;
 
     const paneMask = new Image();
     paneMask.decoding = "async";
@@ -105,7 +107,7 @@ export function WindowRainCanvas({ maskSrc, className = "", layer = "rain", zInd
       const bounds = canvas.getBoundingClientRect();
       width = bounds.width;
       height = bounds.height;
-      const ratio = Math.min(window.devicePixelRatio || 1, 2);
+      const ratio = Math.min(window.devicePixelRatio || 1, width < 800 ? 1.1 : 1.35);
       canvas.width = Math.round(width * ratio);
       canvas.height = Math.round(height * ratio);
       context.setTransform(ratio, 0, 0, ratio, 0, 0);
@@ -120,17 +122,17 @@ export function WindowRainCanvas({ maskSrc, className = "", layer = "rain", zInd
         h: (PANE.y1 - PANE.y0) * scale,
         scale,
       };
-      const area = box.w * box.h;
-      if (layer === "rain") rain = Array.from({ length: Math.max(260, Math.round(area / 360)) }, () => makeRain(true));
-      else beads = Array.from({ length: Math.max(72, Math.round(area / 2100)) }, () => makeBead(true));
-    };
-
-    const drawOutsideRain = (dt: number, time: number) => {
-      const haze = context.createLinearGradient(box.left, box.top, box.left, box.top + box.h);
+      haze = context.createLinearGradient(box.left, box.top, box.left, box.top + box.h);
       haze.addColorStop(0, "rgba(139,157,166,0.055)");
       haze.addColorStop(0.55, "rgba(174,188,194,0.025)");
       haze.addColorStop(1, "rgba(116,133,141,0.07)");
-      context.fillStyle = haze;
+      const area = box.w * box.h;
+      if (layer === "rain") rain = Array.from({ length: Math.min(220, Math.max(130, Math.round(area / 620))) }, () => makeRain(true));
+      else beads = Array.from({ length: Math.min(58, Math.max(36, Math.round(area / 3200))) }, () => makeBead(true));
+    };
+
+    const drawOutsideRain = (dt: number, time: number) => {
+      context.fillStyle = haze ?? "rgba(139,157,166,0.04)";
       context.fillRect(box.left, box.top, box.w, box.h);
 
       context.save();
@@ -171,13 +173,8 @@ export function WindowRainCanvas({ maskSrc, className = "", layer = "rain", zInd
       gradient.addColorStop(0.84, "rgba(166,191,199,0.05)");
       gradient.addColorStop(1, `rgba(238,246,247,${0.23 * drop.clarity})`);
       organicDropPath(drop);
-      context.shadowColor = "rgba(4,10,14,0.3)";
-      context.shadowBlur = Math.max(0.45, drop.width * 0.24);
-      context.shadowOffsetY = Math.max(0.35, drop.width * 0.12);
       context.fillStyle = gradient;
       context.fill();
-      context.shadowBlur = 0;
-      context.shadowOffsetY = 0;
       context.beginPath();
       context.moveTo(drop.x - drop.width * 0.2, drop.y - drop.height * 0.37);
       context.quadraticCurveTo(drop.x - drop.width * 0.04, drop.y - drop.height * 0.51, drop.x + drop.width * 0.1, drop.y - drop.height * 0.32);
@@ -232,7 +229,9 @@ export function WindowRainCanvas({ maskSrc, className = "", layer = "rain", zInd
     };
 
     const draw = (time: number) => {
+      if (paused) return;
       const dt = Math.min(0.04, (time - previous) / 1000);
+      if (dt < 1 / 32) { frame = window.requestAnimationFrame(draw); return; }
       previous = time;
       context.globalCompositeOperation = "source-over";
       context.clearRect(0, 0, width, height);
@@ -247,11 +246,17 @@ export function WindowRainCanvas({ maskSrc, className = "", layer = "rain", zInd
     };
 
     resize();
+    const onVisibility = () => {
+      paused = document.hidden;
+      if (!paused) { previous = performance.now(); frame = window.requestAnimationFrame(draw); }
+    };
     window.addEventListener("resize", resize);
+    document.addEventListener("visibilitychange", onVisibility);
     frame = window.requestAnimationFrame(draw);
     return () => {
       window.cancelAnimationFrame(frame);
       window.removeEventListener("resize", resize);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [maskSrc, layer]);
 
