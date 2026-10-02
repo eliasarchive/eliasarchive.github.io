@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep ambient canvas effects frame-limited, visibility-aware, and pixel-density capped so atmosphere never blocks interaction.

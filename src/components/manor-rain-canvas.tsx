@@ -69,32 +69,54 @@ export function ManorRainCanvas() {
     let previousTime = performance.now();
     let drops: Drop[] = [];
     const impacts: Impact[] = [];
+    let renderedWidth = SOURCE_WIDTH;
+    let renderedHeight = SOURCE_HEIGHT;
+    let offsetX = 0;
+    let offsetY = 0;
+    let paused = document.hidden;
+
+    const pointInImage = (x: number, y: number) => ({ x: (x - offsetX) / renderedWidth, y: (y - offsetY) / renderedHeight });
+    const hitsDriveway = (x: number, y: number) => {
+      const point = pointInImage(x, y);
+      if (point.y < 0.615 || point.y > 1.02) return false;
+      const depth = Math.min(1, Math.max(0, (point.y - 0.615) / 0.405));
+      const halfWidth = 0.075 + depth * 0.44;
+      const center = 0.5 + depth * 0.006;
+      return point.x > center - halfWidth && point.x < center + halfWidth;
+    };
 
     const resize = () => {
       const bounds = canvas.getBoundingClientRect();
       width = bounds.width;
       height = bounds.height;
-      const ratio = Math.min(window.devicePixelRatio || 1, 2);
+      const ratio = Math.min(window.devicePixelRatio || 1, width < 800 ? 1.15 : 1.4);
       canvas.width = Math.round(width * ratio);
       canvas.height = Math.round(height * ratio);
       context.setTransform(ratio, 0, 0, ratio, 0, 0);
-      drops = Array.from({ length: Math.max(230, Math.round(width * height / 2200)) }, () => newDrop(width, height));
+      const scale = Math.max(width / SOURCE_WIDTH, height / SOURCE_HEIGHT);
+      renderedWidth = SOURCE_WIDTH * scale;
+      renderedHeight = SOURCE_HEIGHT * scale;
+      offsetX = (width - renderedWidth) / 2;
+      offsetY = (height - renderedHeight) / 2;
+      drops = Array.from({ length: Math.min(280, Math.max(150, Math.round(width * height / 4200))) }, () => newDrop(width, height));
     };
 
     const spawnImpact = (drop: Drop) => {
-      if (!isDriveway(drop.x, drop.y, width, height)) return;
-      const sourcePoint = imageCoordinates(drop.x, drop.y, width, height);
+      if (!hitsDriveway(drop.x, drop.y)) return;
+      const sourcePoint = pointInImage(drop.x, drop.y);
       const depth = Math.max(0, Math.min(1, (sourcePoint.y - 0.625) / 0.375));
       if (Math.random() < 0.42) {
         impacts.push({ x: drop.x, y: drop.y, age: 0, life: 0.48 + Math.random() * 0.42, size: 4 + depth * 14 + Math.random() * 5, kind: "ripple" });
       } else if (Math.random() < 0.35) {
         impacts.push({ x: drop.x, y: drop.y, age: 0, life: 0.2 + Math.random() * 0.17, size: 3 + depth * 7, kind: "splash" });
       }
-      if (impacts.length > 220) impacts.splice(0, impacts.length - 220);
+      if (impacts.length > 90) impacts.splice(0, impacts.length - 90);
     };
 
     const draw = (time: number) => {
+      if (paused) return;
       const delta = Math.min(0.035, (time - previousTime) / 1000);
+      if (delta < 1 / 34) { animationFrame = window.requestAnimationFrame(draw); return; }
       previousTime = time;
       context.clearRect(0, 0, width, height);
 
@@ -113,8 +135,8 @@ export function ManorRainCanvas() {
         context.lineWidth = drop.width;
         context.stroke();
 
-        if (drop.y > previousY && isDriveway(drop.x, drop.y, width, height)) {
-          const sourcePoint = imageCoordinates(drop.x, drop.y, width, height);
+        if (drop.y > previousY && hitsDriveway(drop.x, drop.y)) {
+          const sourcePoint = pointInImage(drop.x, drop.y);
           const depth = Math.max(0, Math.min(1, (sourcePoint.y - 0.625) / 0.375));
           const landingChance = delta * (0.8 + depth * 4.8);
           if (Math.random() < landingChance) {
@@ -156,11 +178,17 @@ export function ManorRainCanvas() {
     };
 
     resize();
+    const onVisibility = () => {
+      paused = document.hidden;
+      if (!paused) { previousTime = performance.now(); animationFrame = window.requestAnimationFrame(draw); }
+    };
     window.addEventListener("resize", resize);
+    document.addEventListener("visibilitychange", onVisibility);
     animationFrame = window.requestAnimationFrame(draw);
     return () => {
       window.cancelAnimationFrame(animationFrame);
       window.removeEventListener("resize", resize);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);
 

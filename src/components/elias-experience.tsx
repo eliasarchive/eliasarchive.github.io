@@ -486,21 +486,31 @@ export function EliasExperience() {
   const { tone, roomEnter, thunder, beginAmbience, beginJazz, stopPiano, beginRain, prepareRain, setRainScene, stopRain, resume } = useSound(!muted);
 
   useEffect(() => {
-    // Warm every heavy visual (character art + botanical frame) as soon
-    // as the experience mounts so opening the profile never waits on decoding.
-    const sources = [manorEntrance, manorEntranceForeground, manorStair, manorGallery, manorStudy, manorRoomInterior, manorRoomGlass, manorRoomPaneMask, welcomeRoseField, welcomeFrameSquare, eliasBotanicalFrame, eliasRose, eliasBowing, nanasePortrait, nanaseClawLogo, ashleyPortrait, ashleyHatEmblem, ashleyNameEmblem, rowanPortrait, rowanNameEmblem, roseEmblem, archiveRoseField];
-    sources.forEach((source) => {
-      const link = document.createElement("link");
-      link.rel = "preload"; link.as = "image"; link.href = source;
-      link.setAttribute("fetchpriority", "high");
-      document.head.appendChild(link);
+    const sources = [manorEntranceForeground, manorStair, manorGallery, manorStudy, manorRoomInterior, manorRoomGlass, manorRoomPaneMask, welcomeRoseField, welcomeFrameSquare, eliasBotanicalFrame, eliasRose, eliasBowing, nanasePortrait, nanaseClawLogo, ashleyPortrait, ashleyHatEmblem, ashleyNameEmblem, rowanPortrait, rowanNameEmblem, roseEmblem, archiveRoseField];
+    let cancelled = false;
+    let sourceIndex = 0;
+    const warmNext = () => {
+      if (cancelled || sourceIndex >= sources.length) return;
+      const source = sources[sourceIndex];
+      sourceIndex += 1;
+      if (!source) return;
       const image = new Image();
       image.decoding = "async";
       image.src = source;
-      void image.decode().catch(() => undefined);
       warmedImages.push(image);
-    });
+      void image.decode().catch(() => undefined).finally(() => {
+        if (!cancelled) window.setTimeout(warmNext, 40);
+      });
+    };
+    const idleId = "requestIdleCallback" in window
+      ? window.requestIdleCallback(warmNext, { timeout: 900 })
+      : window.setTimeout(warmNext, 250);
     prepareRain();
+    return () => {
+      cancelled = true;
+      if ("cancelIdleCallback" in window) window.cancelIdleCallback(idleId);
+      else window.clearTimeout(idleId);
+    };
   }, [prepareRain]);
 
 
@@ -591,7 +601,7 @@ function SoundControl({ muted, stage, onToggle }: { muted: boolean; stage: Exper
 }
 
 
-const dustMotes = Array.from({ length: 72 }, (_, index) => ({
+const dustMotes = Array.from({ length: 46 }, (_, index) => ({
   x: (index * 37 + 11) % 100,
   y: (index * 61 + 7) % 100,
   size: 1.2 + ((index * 17) % 7) * 0.46,
@@ -602,7 +612,7 @@ const dustMotes = Array.from({ length: 72 }, (_, index) => ({
 }));
 
 function RoomDust({ entering = false, subtle = false }: { entering?: boolean; subtle?: boolean }) {
-  const motes = subtle ? dustMotes.slice(0, 38) : dustMotes;
+  const motes = subtle ? dustMotes.slice(0, 24) : dustMotes;
   return (
     <div className={`room-dust ${subtle ? "manor-dust" : ""} ${entering ? "room-dust-rush" : ""}`} aria-hidden="true">
       {motes.map((mote, index) => (
@@ -708,20 +718,34 @@ function DeskScene({ onEnter, entering }: { onEnter: () => void; entering: boole
 }
 
 function WelcomeScreen({ onEnter }: { onEnter: () => void }) {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
   const [leaving, setLeaving] = useState(false);
+  const screenRef = useRef<HTMLButtonElement | null>(null);
+  const pointerFrameRef = useRef<number | null>(null);
+  const handlePointerMove = (event: React.PointerEvent<HTMLButtonElement>) => {
+    const x = event.clientX / window.innerWidth - .5;
+    const y = event.clientY / window.innerHeight - .5;
+    if (pointerFrameRef.current !== null) return;
+    pointerFrameRef.current = window.requestAnimationFrame(() => {
+      screenRef.current?.style.setProperty("--pointer-x", String(x));
+      screenRef.current?.style.setProperty("--pointer-y", String(y));
+      pointerFrameRef.current = null;
+    });
+  };
+  useEffect(() => () => {
+    if (pointerFrameRef.current !== null) window.cancelAnimationFrame(pointerFrameRef.current);
+  }, []);
   const continueToArchive = () => {
     if (leaving) return;
     setLeaving(true);
     window.setTimeout(onEnter, 650);
   };
   return (
-    <button onClick={continueToArchive} onPointerMove={(event) => setPosition({ x: event.clientX / window.innerWidth - .5, y: event.clientY / window.innerHeight - .5 })} className={`grain relative flex h-dvh w-full cursor-pointer items-center justify-center overflow-hidden bg-ink text-center animate-in fade-in duration-700 ${leaving ? "welcome-transition-out" : ""}`}>
-      <div className="computer-desktop absolute inset-0" style={{ transform: `translate(${position.x * -5}px, ${position.y * -5}px) scale(1.02)` }} />
-      <div className="welcome-rose-field" aria-hidden="true" style={{ transform: `translate(${position.x * -8}px, ${position.y * -6}px)` }}><img src={welcomeRoseField} alt="" width={1920} height={1152} className="h-full w-full object-cover" /></div>
+    <button ref={screenRef} onClick={continueToArchive} onPointerMove={handlePointerMove} className={`welcome-screen grain relative flex h-dvh w-full cursor-pointer items-center justify-center overflow-hidden bg-ink text-center animate-in fade-in duration-700 ${leaving ? "welcome-transition-out" : ""}`}>
+      <div className="computer-desktop welcome-parallax-back absolute inset-0" />
+      <div className="welcome-rose-field welcome-parallax-field" aria-hidden="true"><img src={welcomeRoseField} alt="" width={1920} height={1152} decoding="async" className="h-full w-full object-cover" /></div>
       <div className="absolute inset-3 border border-primary/20 md:inset-8" />
       <div className="absolute inset-x-3 top-3 flex h-9 items-center justify-between border-b border-primary/20 bg-background/60 px-4 text-[7px] uppercase tracking-[.25em] text-muted-foreground backdrop-blur-md md:inset-x-8 md:top-8"><span>Archer OS</span><span>Private computer · Secure session</span></div>
-      <div className="relative flex min-h-[28rem] w-[min(90vw,38rem)] flex-col items-center justify-center border border-primary/25 bg-background/65 px-5 py-10 shadow-2xl backdrop-blur-xl" style={{ transform: `translate(${position.x * 10}px, ${position.y * 8}px)` }}>
+      <div className="welcome-panel relative flex min-h-[28rem] w-[min(90vw,38rem)] flex-col items-center justify-center border border-primary/25 bg-background/65 px-5 py-10 shadow-2xl backdrop-blur-xl">
         <div className="welcome-botanical-frame" aria-hidden="true" style={{ borderImageSource: `url(${welcomeFrameSquare})` }} />
         <div className="welcome-crest relative z-10 mb-8 grid h-28 w-28 place-items-center rounded-full border border-primary/50" aria-hidden="true">
           <div className="crest-rotate absolute inset-[-9px] rounded-full border border-dashed border-primary/35" />
