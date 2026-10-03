@@ -22,25 +22,6 @@ type Impact = {
 const SOURCE_WIDTH = 1376;
 const SOURCE_HEIGHT = 768;
 
-function imageCoordinates(x: number, y: number, width: number, height: number) {
-  const scale = Math.max(width / SOURCE_WIDTH, height / SOURCE_HEIGHT);
-  const renderedWidth = SOURCE_WIDTH * scale;
-  const renderedHeight = SOURCE_HEIGHT * scale;
-  return {
-    x: (x - (width - renderedWidth) / 2) / renderedWidth,
-    y: (y - (height - renderedHeight) / 2) / renderedHeight,
-  };
-}
-
-function isDriveway(x: number, y: number, width: number, height: number) {
-  const point = imageCoordinates(x, y, width, height);
-  if (point.y < 0.615 || point.y > 1.02) return false;
-  const depth = Math.min(1, Math.max(0, (point.y - 0.615) / 0.405));
-  const halfWidth = 0.075 + depth * 0.44;
-  const center = 0.5 + depth * 0.006;
-  return point.x > center - halfWidth && point.x < center + halfWidth;
-}
-
 function newDrop(width: number, height: number, randomY = true): Drop {
   const depth = 0.45 + Math.random() * 0.75;
   return {
