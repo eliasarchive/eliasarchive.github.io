@@ -33,7 +33,6 @@ export function LightningCanvas({ onStrike }: { onStrike?: () => void }) {
         ctx.lineCap = "round"; ctx.shadowColor = "rgba(200,215,255,.95)"; ctx.shadowBlur = 18;
         for (const [a, b, c, d, lw] of segs) { ctx.strokeStyle = `rgba(235,242,255,${flicker})`; ctx.lineWidth = lw; ctx.beginPath(); ctx.moveTo(a, b); ctx.lineTo(c, d); ctx.stroke(); }
         ctx.shadowBlur = 0;
-      }
         raf = requestAnimationFrame(draw);
       } else {
         ctx.clearRect(0, 0, w, h);
