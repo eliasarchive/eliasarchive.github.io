@@ -502,14 +502,11 @@ export function EliasExperience() {
         if (!cancelled) window.setTimeout(warmNext, 40);
       });
     };
-    const idleId = "requestIdleCallback" in window
-      ? window.requestIdleCallback(warmNext, { timeout: 900 })
-      : window.setTimeout(warmNext, 250);
+    const idleId = window.requestIdleCallback(warmNext, { timeout: 900 });
     prepareRain();
     return () => {
       cancelled = true;
-      if ("cancelIdleCallback" in window) window.cancelIdleCallback(idleId);
-      else window.clearTimeout(idleId);
+      window.cancelIdleCallback(idleId);
     };
   }, [prepareRain]);
 
