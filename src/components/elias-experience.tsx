@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent } from "react";
 import { createPortal } from "react-dom";
 import { Maximize2, Move, Volume2, VolumeX, X, ZoomIn, ZoomOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -721,7 +721,7 @@ function WelcomeScreen({ onEnter }: { onEnter: () => void }) {
   const [leaving, setLeaving] = useState(false);
   const screenRef = useRef<HTMLButtonElement | null>(null);
   const pointerFrameRef = useRef<number | null>(null);
-  const handlePointerMove = (event: React.PointerEvent<HTMLButtonElement>) => {
+  const handlePointerMove = (event: PointerEvent<HTMLButtonElement>) => {
     const x = event.clientX / window.innerWidth - .5;
     const y = event.clientY / window.innerHeight - .5;
     if (pointerFrameRef.current !== null) return;
