@@ -21,17 +21,11 @@ export function LightningCanvas({ onStrike }: { onStrike?: () => void }) {
   useEffect(() => {
     const canvas = ref.current; if (!canvas) return;
     const ctx = canvas.getContext("2d"); if (!ctx) return;
-    let raf = 0, next = performance.now() + 1800, start = 0, segs: Seg[] = [], w = 0, h = 0;
+    let raf = 0, timer = 0, start = 0, segs: Seg[] = [], w = 0, h = 0;
     const resize = () => { const d = Math.min(devicePixelRatio || 1, 2); w = canvas.clientWidth; h = canvas.clientHeight; canvas.width = w * d; canvas.height = h * d; ctx.setTransform(d, 0, 0, d, 0, 0); };
     resize(); addEventListener("resize", resize);
     const draw = (t: number) => {
       ctx.clearRect(0, 0, w, h);
-      if (t > next) {
-        start = t;
-        next = t + 4500 + Math.random() * 6000;
-        segs = bolt(w * (0.15 + Math.random() * 0.7), -10, h * (0.32 + Math.random() * 0.12), 2.4);
-        onStrike?.();
-      }
       const age = t - start;
       if (age < 700) {
         const flicker = age < 90 ? 1 : age < 160 ? 0.25 : age < 260 ? 0.85 : Math.max(0, 1 - (age - 260) / 440);
@@ -40,10 +34,32 @@ export function LightningCanvas({ onStrike }: { onStrike?: () => void }) {
         for (const [a, b, c, d, lw] of segs) { ctx.strokeStyle = `rgba(235,242,255,${flicker})`; ctx.lineWidth = lw; ctx.beginPath(); ctx.moveTo(a, b); ctx.lineTo(c, d); ctx.stroke(); }
         ctx.shadowBlur = 0;
       }
-      raf = requestAnimationFrame(draw);
+        raf = requestAnimationFrame(draw);
+      } else {
+        ctx.clearRect(0, 0, w, h);
+      }
     };
-    raf = requestAnimationFrame(draw);
-    return () => { cancelAnimationFrame(raf); removeEventListener("resize", resize); };
+    const scheduleStrike = () => {
+      timer = window.setTimeout(() => {
+        if (!document.hidden) {
+          start = performance.now();
+          segs = bolt(w * (0.15 + Math.random() * 0.7), -10, h * (0.32 + Math.random() * 0.12), 2.4);
+          onStrike?.();
+          raf = requestAnimationFrame(draw);
+        }
+        scheduleStrike();
+      }, 4500 + Math.random() * 6000);
+    };
+    timer = window.setTimeout(() => {
+      if (!document.hidden) {
+        start = performance.now();
+        segs = bolt(w * (0.15 + Math.random() * 0.7), -10, h * (0.32 + Math.random() * 0.12), 2.4);
+        onStrike?.();
+        raf = requestAnimationFrame(draw);
+      }
+      scheduleStrike();
+    }, 1800);
+    return () => { cancelAnimationFrame(raf); window.clearTimeout(timer); removeEventListener("resize", resize); };
   }, [onStrike]);
   return <canvas ref={ref} className="pointer-events-none absolute inset-0 z-[1] h-full w-full" aria-hidden="true" />;
 }

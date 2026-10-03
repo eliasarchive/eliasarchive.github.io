@@ -1085,7 +1085,7 @@ function ProfilePanel({ character, panelRef, anchor, leaving, onClose, onExpand 
         <p className={`status-shimmer relative z-[6] mt-1 text-[8px] uppercase ${isElias ? "status-silver" : isAshley ? "status-ashley" : "status-gold"}`}>Status: {record.status}</p>
         <button onClick={(event) => { event.stopPropagation(); onExpand(); }} className="profile-image-button group relative z-[6] mt-3 flex h-32 w-full items-end justify-center overflow-hidden border bg-background/50 md:h-36">
           <span className="pointer-events-none absolute inset-1 border border-primary/20" />
-          <img src={portrait} alt={isElias ? "Elias Archer holding a rose" : isAshley ? "Ashley Archer" : isRowan ? "Rowan Archer" : "Nanase Koji"} loading="eager" fetchPriority="high" decoding="sync" className={`h-full w-full transition duration-700 group-hover:scale-[1.025] ${isElias ? "object-contain" : "object-cover"}`} />
+          <img src={portrait} alt={isElias ? "Elias Archer holding a rose" : isAshley ? "Ashley Archer" : isRowan ? "Rowan Archer" : "Nanase Koji"} loading="eager" decoding="async" className={`h-full w-full transition duration-700 group-hover:scale-[1.025] ${isElias ? "object-contain" : "object-cover"}`} />
           <span className="absolute bottom-3 right-3 grid h-9 w-9 place-items-center border border-primary/60 bg-background/75 text-primary backdrop-blur-md"><Maximize2 className="h-3.5 w-3.5" /></span>
         </button>
         <blockquote className="profile-quote relative z-[6] mb-2 mt-3 border-l pl-3 font-display text-sm italic leading-relaxed text-foreground">
@@ -1105,7 +1105,7 @@ function ImageViewer({ character, onClose }: { character: CharacterId; onClose: 
   return (
     <div className="fixed inset-0 z-[80] grid place-items-center bg-background/90 p-4 backdrop-blur-xl" role="dialog" aria-modal="true" aria-label={`Enlarged image of ${name}`} onClick={onClose}>
       <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close image" className="absolute right-5 top-5 z-10"><X /></Button>
-      <img onClick={(event) => event.stopPropagation()} src={isElias ? eliasRose : isAshley ? ashleyPortrait : isRowan ? rowanPortrait : nanasePortrait} alt={`${name}, enlarged`} className="animate-in zoom-in-95 max-h-[92dvh] max-w-[92vw] object-contain duration-500" />
+      <img onClick={(event) => event.stopPropagation()} src={isElias ? eliasRose : isAshley ? ashleyPortrait : isRowan ? rowanPortrait : nanasePortrait} alt={`${name}, enlarged`} decoding="async" className="animate-in zoom-in-95 max-h-[92dvh] max-w-[92vw] object-contain duration-500" />
     </div>
   );
 }
@@ -1125,7 +1125,7 @@ function AppearanceDossier({ tone }: { tone: (frequency?: number, duration?: num
           <div className="appearance-glow absolute inset-x-[12%] bottom-0 top-[5%]" />
           <div className="absolute inset-0 flex items-center justify-center transition-[transform,filter] duration-700 ease-[cubic-bezier(.16,1,.3,1)]" style={{ transform: selected ? `translate(${(50 - selected.x) * .38}%, ${(50 - selected.y) * .38}%) scale(1.38)` : "translate(0, 0) scale(1)", filter: selected ? "contrast(1.04) brightness(1.03)" : undefined }}>
             <div className="relative">
-              <img src={eliasBowing} alt="Elias Archer bowing in his black school uniform and prefect armband" loading="eager" fetchPriority="high" decoding="sync" className="block max-h-[65vh] max-w-full object-contain drop-shadow-[0_28px_45px_color-mix(in_oklab,var(--ink)_80%,transparent)]" />
+              <img src={eliasBowing} alt="Elias Archer bowing in his black school uniform and prefect armband" loading="eager" decoding="async" className="block max-h-[65vh] max-w-full object-contain drop-shadow-[0_28px_45px_color-mix(in_oklab,var(--ink)_80%,transparent)]" />
               {appearanceFeatures.map((feature) => (
                 <button key={feature.id} aria-label={`View ${feature.label} details`} onClick={() => { tone(520, .08, .02); setActive(feature.id); }} className={`group absolute z-20 h-8 w-8 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-500 ${active && active !== feature.id ? "opacity-20" : "opacity-100"}`} style={{ left: `${feature.x}%`, top: `${feature.y}%` }}>
                   <span className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rotate-45 border border-primary bg-background transition group-hover:scale-150" />
